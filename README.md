@@ -121,3 +121,20 @@ MMRA
 ├── test.py  # entry for model test
 └── README.md  # This file
 ```
+
+
+
+## Citation
+
+If you find the code useful for your research, please consider citing
+
+```latex
+@inproceedings{ting2024predicting,
+  title = {Predicting Micro-video Popularity via Multi-modal Retrieval Augmentation},
+  author = {Ting, Zhong and Jian, Lang and Yifan, Zhang and Zhangtao, Cheng and Kunpeng, Zhang and Fan, Zhou},
+  booktitle = {Proceedings of the 47th ACM SIGIR Conference on Research and Development in Information Retrieval},
+  year = {2024}
+}
+```
+
+If you have any questions about this code or the paper, feel free to contact us:  jian_lang@std.uestc.edu.cn
