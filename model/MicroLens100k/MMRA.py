@@ -4,7 +4,7 @@ import torch.nn as nn
 
 class Model(nn.Module):
 
-    def __init__(self, alpha,frame_num,feature_dim=768):
+    def __init__(self, alpha, frame_num, feature_dim=768):
 
         super(Model, self).__init__()
 
@@ -22,7 +22,7 @@ class Model(nn.Module):
 
         self.retrieval_textual_embedding = nn.Linear(feature_dim, feature_dim)
 
-        self.tahn = nn.Tanh()
+        self.tanh = nn.Tanh()
 
         self.dual_attention_linear_1 = nn.Linear(feature_dim * 2, feature_dim)
 
@@ -48,15 +48,15 @@ class Model(nn.Module):
 
         self.retrieval_uni_modal_linear_2 = nn.Linear(feature_dim, 1)
 
-        self.predict_linear_1 = nn.Linear(feature_dim * 10, 800)
+        self.prediction_module = nn.Sequential(
+            nn.Linear(feature_dim * 10, 800),
+            nn.ReLU(),
+            nn.Linear(800, 200),
+            nn.ReLU(),
+            nn.Linear(200, 1)
+        )
 
-        self.predict_linear_2 = nn.Linear(800, 200)
-
-        self.predict_linear_3 = nn.Linear(200, 1)
-
-        self.relu = nn.ReLU()
-
-        self.label_embedding_linear = nn.Linear(1, feature_dim)  
+        self.label_embedding_linear = nn.Linear(1, feature_dim)
 
     def cross_modal_attention(self, visual_feature, textual_feature, visual_feature_emb, textual_feature_emb):
 
@@ -74,17 +74,17 @@ class Model(nn.Module):
 
         V_star = self.dual_attention_linear_2(torch.cat([V_p, V_n], dim=2))
 
-        T_star = self.tahn(T_star)
+        T_star = self.tanh(T_star)
 
-        V_star = self.tahn(V_star)
+        V_star = self.tanh(V_star)
 
         V_f = self.cross_modal_linear_1(torch.cat([visual_feature, T_star], dim=2))
 
         T_f = self.cross_modal_linear_2(torch.cat([textual_feature, V_star], dim=2))
 
-        V_f = self.tahn(V_f)
+        V_f = self.tanh(V_f)
 
-        T_f = self.tahn(T_f)
+        T_f = self.tanh(T_f)
 
         return V_f, T_f
 
@@ -104,17 +104,17 @@ class Model(nn.Module):
 
         V_star = self.retrieval_dual_attention_linear_2(torch.cat([V_p, V_n], dim=2))
 
-        T_star = self.tahn(T_star)
+        T_star = self.tanh(T_star)
 
-        V_star = self.tahn(V_star)
+        V_star = self.tanh(V_star)
 
         V_f = self.retrieval_cross_modal_linear_1(torch.cat([visual_feature, T_star], dim=2))
 
         T_f = self.retrieval_cross_modal_linear_2(torch.cat([textual_feature, V_star], dim=2))
 
-        V_f = self.tahn(V_f)
+        V_f = self.tanh(V_f)
 
-        T_f = self.tahn(T_f)
+        T_f = self.tanh(T_f)
 
         return V_f, T_f
 
@@ -142,7 +142,7 @@ class Model(nn.Module):
 
         return V_f_star, T_f_star
 
-    def retrieval_aggregation(self, similarity, retrieved_visual_feature, retrieved_textual_feature,retrieved_label):
+    def retrieval_aggregation(self, similarity, retrieved_visual_feature, retrieved_textual_feature, retrieved_label):
 
         similarity = torch.softmax(similarity, dim=1)
 
@@ -172,27 +172,30 @@ class Model(nn.Module):
 
         visual_feature_emb = self.visual_embedding(visual_feature)
 
-        visual_feature_emb = self.tahn(visual_feature_emb)
+        visual_feature_emb = self.tanh(visual_feature_emb)
 
         textual_feature_emb = self.textual_embedding(textual_feature)
 
-        textual_feature_emb = self.tahn(textual_feature_emb)
+        textual_feature_emb = self.tanh(textual_feature_emb)
 
         V_f, T_f = self.cross_modal_attention(visual_feature, textual_feature, visual_feature_emb, textual_feature_emb)
 
         V_f_star, T_f_star = self.uni_modal_attention(V_f, T_f)
 
-        retrieved_visual_aggregated_feature, retrieved_textual_aggregated_feature,retrieved_aggregated_label = self.retrieval_aggregation(similarity, retrieved_visual_feature, retrieved_textual_feature,retrieved_label)
+        retrieved_visual_aggregated_feature, retrieved_textual_aggregated_feature, retrieved_aggregated_label = self.retrieval_aggregation(
+            similarity, retrieved_visual_feature, retrieved_textual_feature, retrieved_label)
 
         retrieved_visual_feature_emb = self.retrieval_visual_embedding(retrieved_visual_aggregated_feature)
 
-        retrieved_visual_feature_emb = self.tahn(retrieved_visual_feature_emb)
+        retrieved_visual_feature_emb = self.tanh(retrieved_visual_feature_emb)
 
         retrieved_textual_feature_emb = self.retrieval_textual_embedding(retrieved_textual_aggregated_feature)
 
-        retrieved_textual_feature_emb = self.tahn(retrieved_textual_feature_emb)
+        retrieved_textual_feature_emb = self.tanh(retrieved_textual_feature_emb)
 
-        V_f_, T_f_ = self.retrieval_cross_modal_attention(retrieved_visual_aggregated_feature, retrieved_textual_aggregated_feature, retrieved_visual_feature_emb, retrieved_textual_feature_emb)
+        V_f_, T_f_ = self.retrieval_cross_modal_attention(retrieved_visual_aggregated_feature,
+                                                          retrieved_textual_aggregated_feature,
+                                                          retrieved_visual_feature_emb, retrieved_textual_feature_emb)
 
         V_f_star_, T_f_star_ = self.retrieval_uni_modal_attention(V_f_, T_f_)
 
@@ -212,15 +215,8 @@ class Model(nn.Module):
 
         r_t_t = torch.mul(T_f_star, T_f_star_)
 
-        output = self.predict_linear_1(torch.cat([T_f_star,V_f_star,T_f_star_,V_f_star_,r_v_v,r_v_t,r_t_v,r_t_t,r_v_l,r_t_l], dim=2))
-
-        output = self.relu(output)
-
-        output = self.predict_linear_2(output)
-
-        output = self.relu(output)
-
-        output = self.predict_linear_3(output)
+        output = self.prediction_module(
+            torch.cat([T_f_star, V_f_star, T_f_star_, V_f_star_, r_v_v, r_v_t, r_t_v, r_t_t, r_v_l, r_t_l], dim=2))
 
         output = output.squeeze(2)
 

@@ -208,9 +208,9 @@ def run_one_epoch(model, loss_fn, optim, train_data_loader, valid_data_loader, d
 
         visual_feature_embedding, textual_feature_embedding, label = batch
 
-        output = model.forward(visual_feature_embedding, textual_feature_embedding)
+        output, kld_loss = model.forward(visual_feature_embedding, textual_feature_embedding)
 
-        loss = loss_fn(output, label)
+        loss = 0.95 * loss_fn(output, label) + 0.05 * kld_loss
 
         optim.zero_grad()
 
@@ -228,25 +228,14 @@ def run_one_epoch(model, loss_fn, optim, train_data_loader, valid_data_loader, d
     with torch.no_grad():
 
         for batch in tqdm(valid_data_loader, desc='Validating Progress'):
+
             batch = [item.to(device) if isinstance(item, torch.Tensor) else item for item in batch]
 
             visual_feature_embedding, textual_feature_embedding, label = batch
 
-            output = model.forward(visual_feature_embedding, textual_feature_embedding)
+            output, kld_loss = model.forward(visual_feature_embedding, textual_feature_embedding)
 
-            output = output.to('cpu')
-
-            label = label.to('cpu')
-
-            output = np.array(output)
-
-            label = np.array(label)
-
-            MAE = mean_absolute_error(label, output)
-
-            nMSE = np.mean(np.square(output - label)) / (label.std() ** 2)
-
-            loss = MAE + nMSE
+            loss = 0.95 * loss_fn(output, label) + 0.05 * kld_loss
 
             total_valid_loss += loss
 
@@ -276,10 +265,10 @@ def main():
 
     parser.add_argument('--lr', default=1e-4, type=float, help='learning rate')
 
-    parser.add_argument('--dataset_id', default='MicroLens-100k', type=str,
+    parser.add_argument('--dataset_id', default='tiktok', type=str,
                         help='id of dataset, options: MicroLens100k, NUS')
 
-    parser.add_argument('--dataset_path', default=r'data', type=str,
+    parser.add_argument('--dataset_path', default=r'D:\CARE\data', type=str,
                         help='path of dataset')
 
     parser.add_argument('--model_id', default='MASSL', type=str, help='id of model')

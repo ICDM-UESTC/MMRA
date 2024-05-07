@@ -53,6 +53,7 @@ class HMMVED(nn.Module):
         )
 
     def generate_visual_feature_mu_std(self, x, logvar):
+
         mu = self.visual_mu_layer(x)
 
         std = torch.exp(0.5 * logvar)
@@ -60,6 +61,7 @@ class HMMVED(nn.Module):
         return mu, std
 
     def generate_textual_feature_mu_std(self, x, logvar):
+
         mu = self.textual_mu_layer(x)
 
         std = torch.exp(0.5 * logvar)
@@ -67,6 +69,7 @@ class HMMVED(nn.Module):
         return mu, std
 
     def generate_latent_representation_z(self, visual_mu, visual_std, textual_mu, textual_std):
+
         visual_prec = 1 / (visual_std ** 2)
 
         textual_prec = 1 / (textual_std ** 2)
@@ -79,9 +82,14 @@ class HMMVED(nn.Module):
 
         z = poe_mu + eps * poe_std
 
-        return z
+        logvar = 2 * torch.log(poe_std)
+
+        kld_loss = torch.mean(-0.5 * torch.sum(1 + logvar - poe_mu ** 2 - logvar.exp(), dim = 1), dim = 0)
+
+        return z, kld_loss
 
     def forward(self, visual_feature, textual_feature):
+
         visual_feature = self.visual_dense_layer(visual_feature)
 
         visual_feature = self.visual_encoder(visual_feature)
@@ -96,12 +104,10 @@ class HMMVED(nn.Module):
 
         textual_mu, textual_std = self.generate_textual_feature_mu_std(textual_feature, textual_logvar)
 
-        z = self.generate_latent_representation_z(visual_mu, visual_std, textual_mu, textual_std)
+        z, kld_loss = self.generate_latent_representation_z(visual_mu, visual_std, textual_mu, textual_std)
 
         output = self.decoder(z)
 
-        return output
-
-
+        return output, kld_loss
 
 

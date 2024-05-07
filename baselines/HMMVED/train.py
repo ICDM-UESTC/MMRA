@@ -62,6 +62,7 @@ def print_init_msg(logger, args):
 
 
 def make_saving_folder_and_logger(args):
+
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
     folder_name = f"train_{args.model_id}_{args.dataset_id}_{args.metric}_{timestamp}"
@@ -124,7 +125,7 @@ def train_val(args):
 
     train_data = MyData(os.path.join(args.dataset_path, args.dataset_id, 'train.pkl'))
 
-    valid_data = MyData(os.path.join(os.path.join(args.dataset_path, args.dataset_id, 'valid.pkl')))
+    valid_data = MyData(os.path.join(args.dataset_path, args.dataset_id, 'valid.pkl'))
 
     train_data_loader = DataLoader(dataset=train_data, batch_size=args.batch_size, collate_fn=custom_collate_fn)
 
@@ -198,6 +199,7 @@ def train_val(args):
 
 
 def run_one_epoch(model, loss_fn, optim, train_data_loader, valid_data_loader, device):
+
     model.train()
 
     min_train_loss = 1008611
@@ -208,9 +210,9 @@ def run_one_epoch(model, loss_fn, optim, train_data_loader, valid_data_loader, d
 
         visual_feature_embedding, textual_feature_embedding, label = batch
 
-        output = model.forward(visual_feature_embedding, textual_feature_embedding)
+        output, kld_loss = model.forward(visual_feature_embedding, textual_feature_embedding)
 
-        loss = loss_fn(output, label)
+        loss = 0.95 * loss_fn(output, label) + 0.05 * kld_loss
 
         optim.zero_grad()
 
@@ -219,6 +221,7 @@ def run_one_epoch(model, loss_fn, optim, train_data_loader, valid_data_loader, d
         optim.step()
 
         if min_train_loss > loss:
+
             min_train_loss = loss
 
     model.eval()
@@ -228,25 +231,14 @@ def run_one_epoch(model, loss_fn, optim, train_data_loader, valid_data_loader, d
     with torch.no_grad():
 
         for batch in tqdm(valid_data_loader, desc='Validating Progress'):
+
             batch = [item.to(device) if isinstance(item, torch.Tensor) else item for item in batch]
 
             visual_feature_embedding, textual_feature_embedding, label = batch
 
-            output = model.forward(visual_feature_embedding, textual_feature_embedding)
+            output, kld_loss = model.forward(visual_feature_embedding, textual_feature_embedding)
 
-            output = output.to('cpu')
-
-            label = label.to('cpu')
-
-            output = np.array(output)
-
-            label = np.array(label)
-
-            MAE = mean_absolute_error(label, output)
-
-            nMSE = np.mean(np.square(output - label)) / (label.std() ** 2)
-
-            loss = MAE + nMSE
+            loss = 0.95 * loss_fn(output, label) + 0.05 * kld_loss
 
             total_valid_loss += loss
 
@@ -276,7 +268,7 @@ def main():
 
     parser.add_argument('--lr', default=1e-4, type=float, help='learning rate')
 
-    parser.add_argument('--dataset_id', default='MicroLens-100k', type=str,
+    parser.add_argument('--dataset_id', default='microlens', type=str,
                         help='id of dataset, options: MicroLens100k, NUS')
 
     parser.add_argument('--dataset_path', default=r'data', type=str,
