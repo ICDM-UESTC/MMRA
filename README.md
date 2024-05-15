@@ -129,7 +129,7 @@ MMRA
 If you find the code useful for your research, please consider citing
 
 ```latex
-@inproceedings{ting2024predicting,
+@inproceedings{zhong2024predicting,
   title = {Predicting Micro-video Popularity via Multi-modal Retrieval Augmentation},
   author = {Ting, Zhong and Jian, Lang and Yifan, Zhang and Zhangtao, Cheng and Kunpeng, Zhang and Fan, Zhou},
   booktitle = {Proceedings of the 47th ACM SIGIR Conference on Research and Development in Information Retrieval},
