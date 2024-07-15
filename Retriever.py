@@ -116,13 +116,13 @@ def retrieve_items(mode, k, train_path, valid_path, test_path):
 
         for i in tqdm(range(len(train_df))):
 
-            train_vec = train_df['retrieval_feature_2'][i]
+            train_vec = train_df['retrieval_feature'][i]
 
             current_database_df = database_df[database_df['item_id'] != train_df['item_id'][i]]
 
             current_database_df = current_database_df.reset_index(drop=True)
 
-            database_matrix = (current_database_df['retrieval_feature_2']).tolist()
+            database_matrix = (current_database_df['retrieval_feature']).tolist()
 
             similarity_list = compute_normalized_inner_product_similarity(train_vec, database_matrix)
 
