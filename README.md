@@ -3,12 +3,9 @@
 > In this repository, we provide source code of MMRA framework for reproductivity. 🚀🚀🚀
 >
 
-<p align="center">
-<img src=".\pics\MMRA-17210409703151.jpg" height = "350" alt="" align=center />
-</p>
+![MMRA](pics/MMRA.jpg)
 
 
-## 
 
 ## Dataset
 
