@@ -103,10 +103,9 @@ MMRA
 │   ├── SVR 
 │   └── TMALL 
 ├── data  # source code of data-preprocessing and retrieval preprocessing
-│   ├── Data.md
 │   ├── MicroLens-100k
-│		 ├── data_preprocess
-│		 └── ── retrieval_preprocess
+│	│	 ├── data_preprocess
+│	│	 ├── retrieval_preprocess
 ├── dataloader  # dataloader for training, validation and test
 │   ├── MicroLens
 │	│	 ├── dataset.py 
@@ -117,7 +116,7 @@ MMRA
 ├── model  # code of MMRA
 │   ├── MicroLens
 │	│	 ├── MMRA.py 
-├── retriever.py # code of Retriever used in MMRA
+├── Retriever.py # code of Retriever used in MMRA
 ├── train.py  # entry for model training,validation
 ├── test.py  # entry for model test
 └── README.md  # This file
