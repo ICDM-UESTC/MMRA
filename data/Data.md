@@ -32,5 +32,5 @@ Run the **dataset_split.py** to obtain train, test and valid pickle files.
 
 #### Retrieval
 
-Run the retriever.py to do retrieval process. After this step, all the data preprocessing is finished.
+Run the **retriever.py** to do retrieval process. After this step, all the data preprocessing is finished.
 
