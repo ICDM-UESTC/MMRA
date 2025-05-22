@@ -1,6 +1,6 @@
 # MMRA：Predicting Micro-video Popularity via Multi-modal Retrieval Augmentation
 
-> In this repository, we provide source code of MMRA framework for reproductivity 🚀🚀🚀. Paper doi: https://dl.acm.org/doi/abs/10.1145/3626772.3657929.
+> In this repository, we provide source code of MMRA framework for reproductivity 🚀🚀🚀. Paper doi: https://dl.acm.org/doi/abs/10.1145/3626772.3657929. You can also acquire this paper through: https://jianlang.org/assets/papers/SIGIR-2024-MMRA.pdf.
 >
 
 ![MMRA](pics/MMRA.jpg)
@@ -52,6 +52,8 @@ pip install transformers
 ```
 
 #### Run code
+
+First, please refer to data/Data.md for data preprocessing, and then follow the below steps to run the code.
 
 To train MMRA framework on a dataset, run the following command:
 

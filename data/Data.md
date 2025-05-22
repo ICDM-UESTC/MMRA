@@ -12,13 +12,17 @@ Create a dataframe in pickle format, named data.pkl, with the following columns:
 - text: This columns is the title of each micro-video.
 - label: The label popularity here is defined as the number of total comments for a micro-video.
 
-#### Data preprocess
+#### Data Preprocess
 
-##### Feature extraction
+##### Feature Extraction
 
 Run the **video_frame_capture.py** for each raw micro-videos obtain video frames, here the default number of frames is 10 for each video.
 
 Then run the **textual_engineering.py**, **visual_engineering.py** to extract the features and add these two features to data.pkl named **visual_feature_embedding_cls** and **textual_feature_embedding**, respectively.
+
+##### Label Preprocess
+
+Run label_preprocess.py to transform the original label values into their log-base-2 equivalents.
 
 ##### Retrieval Preprocess
 
