@@ -1,6 +1,6 @@
 # MMRA：Predicting Micro-video Popularity via Multi-modal Retrieval Augmentation
 
-> In this repository, we provide source code of MMRA framework for reproductivity 🚀🚀🚀. Paper doi: https://dl.acm.org/doi/abs/10.1145/3626772.3657929. You can also acquire this paper through: https://jianlang.org/assets/papers/SIGIR-2024-MMRA.pdf.
+> In this repository, we provide source code of MMRA framework for reproductivity 🚀🚀🚀. Paper doi: https://dl.acm.org/doi/abs/10.1145/3626772.3657929.
 >
 
 ![MMRA](pics/MMRA.jpg)
